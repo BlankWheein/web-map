@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet debug page</title>
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js" integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA==" crossorigin=""></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="../dist/MarkerCluster.css" />
+	<link rel="stylesheet" href="../dist/MarkerCluster.Default.css" />
+	<script src="../dist/leaflet.markercluster-src.js"></script>
+
+</head>
+<style>
+	#map { height: 600px; }
+</style>
+<body>
+
+	<div id="map"></div>
+	<script type="text/javascript">
+		var LeafIcon = L.Icon.extend({
+			options: {
+				shadowUrl: 'leaf-shadow.png',
+				iconSize:     [50, 50],
+				shadowSize:   [25, 25],
+				iconAnchor:   [0, 0],
+				shadowAnchor: [2, 2],
+				popupAnchor:  [0, 0]
+			}
+		});
+
+		var map = L.map('map').setView([56.00109266152279, 10.721776513713733], 7);
+		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+		}).addTo(map);
+		var markers = L.markerClusterGroup();
+		console.log("Getting activities from ./api/activities")
+		fetch("./api/activities").then(p => p.json()).then(p => p.data.forEach(element => {
+			console.log("Got activity: " + element.id)
+			if (element.icon_url != null) {
+				icon = new LeafIcon({iconUrl: element.icon_url});
+				var marker = L.marker([element.lat, element.long], {icon: icon});
+				marker.bindPopup('<p>You clicked on ' + element.id + '</p>');
+				markers.addLayer(marker);
+
+			} else {
+				var marker = L.marker([element.lat, element.long]);
+				marker.bindPopup('<p>You clicked on ' + element.id + '</p>');
+				markers.addLayer(marker);
+			}
+		})).then(p => console.log("Got all activities from api"));
+		map.addLayer(markers);
+
+
+
+
+	</script>
+</body>
+</html>
