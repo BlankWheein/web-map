@@ -14,11 +14,35 @@
 </head>
 <style>
 	#map { height: 600px; }
+	.markers {
+		background-color: rgba(200, 200, 200, 0.6);
+	}
+	.circle{
+		border:2px solid black;
+		border-radius:50%;
+		background:rgba(255,255,255,0);
+		color:white;
+		width:1000px;
+		height:100px;
+		text-align:center;
+		line-height:100px;
+	}
+	.marker-cluster-small {
+background-color: transparent;
+}
+.marker-cluster-small div {
+background-color: transparent;
+color: black;
+font-size: 1.3rem;
+font-family: 'Times New Roman', Times, serif
+}
+
 </style>
 <body>
 
 	<div id="map"></div>
 	<script type="text/javascript">
+		localStorage.setItem("id", "dcbb5e90-06aa-47c1-a343-f21b382d8c2e")
 		var LeafIcon = L.Icon.extend({
 			options: {
 				shadowUrl: 'leaf-shadow.png',
@@ -35,21 +59,35 @@
 			maxZoom: 19,
 			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
-		var markers = L.markerClusterGroup();
-		console.log("Getting activities from ./api/activities")
-		fetch("./api/activities").then(p => p.json()).then(p => p.data.forEach(element => {
-			console.log(element)
-			if (element.icon_url != null) {
-				icon = new LeafIcon({iconUrl: element.icon_url});
-				var marker = L.marker([element.lat, element.long], {icon: icon});
-				marker.bindPopup('<p>You clicked on ' + element.name + '</p><img src="' + element.icon_url + '"/>');
-				markers.addLayer(marker);
-
-			} else {
-				var marker = L.marker([element.lat, element.long]);
-				marker.bindPopup('<p>You clicked on ' + element.name + '</p> <button>' + element.name +'</button>');
-				markers.addLayer(marker);
+		var markers = L.markerClusterGroup({
+			iconCreateFunction: function (cluster) {
+			var childCount = cluster.getChildCount();
+			var c = ' marker-cluster-small ';
+			return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>', 
+			className: 'marker-cluster circle' + c, iconSize: new L.Point(40, 40) });
 			}
+		});
+		console.log(`Getting activities from ./api/activities/${localStorage.getItem("id")}`)
+		fetch(`./api/activities/${localStorage.getItem("id")}`).then(p => p.json()).then(p => p.data.forEach(element => {
+			console.log(element)
+			var marker = L.marker([element.lat, element.long]);
+			marker.on('click', function(e) {
+				element.count += 1;
+				console.log(element)
+				fetch("./api/activities/clicked", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					userId: localStorage.getItem("id"),
+					activityId: element.id,
+					clickType: 0
+				})
+			})
+			});
+			marker.bindPopup('<p>You clicked on ' + element.name + '</p> <button>' + element.name +'</button> i have been clicked (' + element.count + ') times');
+			markers.addLayer(marker);
 		})).then(p => console.log("Got all activities from api"));
 		map.addLayer(markers);
 		map.on('click', function(e) {        

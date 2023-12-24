@@ -25,13 +25,27 @@ app.get('/',  function(req, res) {
 
 
 app.post('/api/activities', async function(req, res) {
+  //var data = await client.query(`INSERT INTO map.activities(id, lat, "long", name) VALUES ('${v4()}',${req.body.lat}, ${req.body.lng}, 'Auto Generated');`);
+  res.send();
+});
+
+app.post('/api/activities/clicked', async function(req, res) {
   console.log(req.body);
-  var data = await client.query(`INSERT INTO map.activities(id, lat, "long", name) VALUES ('${v4()}',${req.body.lat}, ${req.body.lng}, 'Auto Generated');`);
+  let userId = req.body.userId;
+  let activityId = req.body.activityId;
+  let clickType = req.body.clickType;
+  let date = new Date();
+  var data = await client.query(`INSERT INTO map.activity_clicked( user_id, date, type, activity_id, id) VALUES ('${userId}', '${date.toJSON()}', ${clickType}, '${activityId}', '${v4()}');`);
   res.send(data);
 });
 
-app.get('/api/activities', async function(req, res) {
-  var data = await client.query("SELECT * FROM map.activities")
+
+
+app.get('/api/activities/:userId', async function(req, res) {
+  console.log(req.params.userId)
+  var data = await client.query(`SELECT a.*, count(ac) FROM map.activities a
+  left outer join map.activity_clicked ac on ac.activity_id=a.id AND ac.user_id='${req.params.userId}'
+  group by a.id`)
   res.send(
       {
           data : data.rows
