@@ -40,6 +40,15 @@ app.post('/api/activities/clicked', async function(req, res) {
 });
 
 
+app.get('/api/activities/redirect/:activityId/:userId', async function(req, res) {
+
+  var data = await client.query(`SELECT * FROM map.activities a WHERE a.id='${req.params.activityId}'`);
+  let date = new Date();
+  await client.query(`INSERT INTO map.activity_clicked( user_id, date, type, activity_id, id) VALUES ('${req.params.userId}', '${date.toJSON()}', 1, '${req.params.activityId}', '${v4()}');`);
+  res.redirect(data.rows[0].url);
+});
+
+
 
 app.get('/api/activities/:userId', async function(req, res) {
   console.log(req.params.userId)

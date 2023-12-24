@@ -86,28 +86,25 @@ font-family: 'Times New Roman', Times, serif
 				})
 			})
 			});
-			marker.bindPopup('<p>You clicked on ' + element.name + '</p> <button>' + element.name +'</button> i have been clicked (' + element.count + ') times');
+			marker.bindPopup(`
+			
+			<h3>${element.name}</h3>
+			<p>${element.address}</p>
+			<p>Pris vokesen: ${element.price_adult}</p>	
+			<p>Pris børn: ${element.price_child}</p>
+			<div>${element.offer}</div>
+			<br/>
+			<div>${element.opening_hours}</div>
+			
+			<span>Gå til </span>
+				<a href="./api/activities/redirect/${element.id}/${localStorage.getItem("id")}" target="_blank">${element.name}</a>
+
+			
+			
+			`);
 			markers.addLayer(marker);
 		})).then(p => console.log("Got all activities from api"));
 		map.addLayer(markers);
-		map.on('click', function(e) {        
-			var popLocation= e.latlng;
-			console.log(e);
-			fetch("./api/activities", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					lat: e.latlng.lat,
-					lng: e.latlng.lng
-				})
-			})
-			var popup = L.popup()
-			.setLatLng(popLocation)
-			.setContent('<p>Hello world!<br />This is a nice popup.</p>')
-			.openOn(map);        
-    });
 	</script>
 </body>
 </html>
