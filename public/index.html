@@ -105,6 +105,18 @@ font-family: 'Times New Roman', Times, serif
 			markers.addLayer(marker);
 		})).then(p => console.log("Got all activities from api"));
 		map.addLayer(markers);
+		map.on('click', function(e) {
+			fetch("./api/activities", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					"lat": e.latlng.lat,
+					"lng": e.latlng.lng,
+				})
+			})
+		});
 	</script>
 </body>
 </html>

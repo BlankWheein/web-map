@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+        </script> 
+    </head>
+    <body>
+        <canvas id="myChart" style="width:100%;max-width:700px"></canvas> 
+
+
+
+        <script>
+            var data = [];
+            fetch("./api/clickrate").then(p => p.json()).then(p => {
+
+                data = p.data;
+                console.log(p);
+                new Chart("myChart", {
+                type: "scatter",
+                data: {
+                    datasets: [{
+                    pointRadius: 4,
+                    label: "Clickthrough Rate",
+                    pointBackgroundColor: "rgba(0,0,255,1)",
+                    data: data
+                    }]
+                },
+                options: {
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            console.log(data);
+                        var label = data.datasets[0].data[tooltipItem.index].name;
+                        return label + ': (' + tooltipItem.xLabel + ', ' + tooltipItem.yLabel + ')';
+                        }
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'URL CLICKED'
+                    }
+                    }],
+                    xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'MARKER CLICKED'
+                    }
+                    }]
+                }   
+            }
+                });
+            });
+            
+        
+        </script>
+    </body>
+</html>
